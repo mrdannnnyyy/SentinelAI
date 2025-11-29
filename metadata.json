@@ -1,0 +1,8 @@
+{
+  "name": "Sentinel AI NVR",
+  "description": "Next-generation CCTV dashboard featuring real-time monitoring, AI-powered theft detection, facial recognition management, and deep analytics.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
