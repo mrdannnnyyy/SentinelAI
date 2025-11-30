@@ -1,0 +1,29 @@
+
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: sentinel_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend_data:/app/data
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=sqlite:///./data/sentinel.db
+    # Uncomment below to enable GPU support if you have NVIDIA drivers installed
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Optional: Serve frontend via Nginx or similar if productionizing
+  # frontend:
+  #   build: .
+  #   ports:
+  #     - "3000:3000"
+    

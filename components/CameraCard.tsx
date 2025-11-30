@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Camera } from '../types';
-import { Maximize2, Activity, AlertCircle, PlayCircle, Eye } from 'lucide-react';
-import { analyzeFrame } from '../services/geminiService';
+import { Maximize2, Activity, AlertCircle, PlayCircle, Eye, Disc } from 'lucide-react';
+import { analyzeFrame } from '../services/aiService';
+import CameraFeed from './CameraFeed';
 
 interface CameraCardProps {
   camera: Camera;
@@ -16,9 +18,9 @@ const CameraCard: React.FC<CameraCardProps> = ({ camera, onMaximize }) => {
   const handleAIAnalysis = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setAnalyzing(true);
-    // Simulate image capture with placeholder
-    // In a real app, this would be a frame capture
-    const result = await analyzeFrame(camera.thumbnail); // Passing URL, service handles it (mocked in this case for URL usage)
+    // In a real app we would snapshot the canvas. 
+    // Here we just pass a placeholder string to the local service
+    const result = await analyzeFrame("snapshot-data"); 
     setAnalysisResult(result);
     setAnalyzing(false);
     setTimeout(() => setAnalysisResult(null), 5000); // Clear after 5s
@@ -33,7 +35,7 @@ const CameraCard: React.FC<CameraCardProps> = ({ camera, onMaximize }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Feed Header Overlay */}
-      <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start z-10 bg-gradient-to-b from-black/80 to-transparent">
+      <div className="absolute top-0 left-0 right-0 p-3 flex justify-between items-start z-10 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
         <div>
            <h3 className="text-white font-medium text-sm flex items-center gap-2">
              {camera.name}
@@ -53,14 +55,10 @@ const CameraCard: React.FC<CameraCardProps> = ({ camera, onMaximize }) => {
         </div>
       </div>
 
-      {/* Main Video Area (Image Mock) */}
+      {/* Main Video Area */}
       <div className="aspect-video relative bg-black flex items-center justify-center cursor-pointer" onClick={() => onMaximize(camera)}>
         {camera.status === 'online' ? (
-          <img
-            src={camera.thumbnail}
-            alt={camera.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-          />
+          <CameraFeed camera={camera} className="transition-transform duration-700 group-hover:scale-105" />
         ) : (
           <div className="flex flex-col items-center text-slate-600">
             <AlertCircle size={32} className="mb-2" />
@@ -70,19 +68,19 @@ const CameraCard: React.FC<CameraCardProps> = ({ camera, onMaximize }) => {
 
         {/* AI Analysis Overlay */}
         {analysisResult && (
-            <div className="absolute inset-0 bg-black/80 p-4 flex items-center justify-center text-center animate-in fade-in">
+            <div className="absolute inset-0 bg-black/80 p-4 flex items-center justify-center text-center animate-in fade-in z-20">
                 <p className="text-sm text-blue-200">{analysisResult}</p>
             </div>
         )}
 
         {/* Playback Controls Overlay (On Hover) */}
         {isHovered && camera.status === 'online' && !analysisResult && (
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center gap-4 animate-in fade-in duration-200">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center gap-4 animate-in fade-in duration-200 z-20">
              <button
                 onClick={(e) => { e.stopPropagation(); onMaximize(camera); }}
                 className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white transition-all transform hover:scale-110"
              >
-                <PlayCircle size={24} fill="white" className="text-transparent" />
+                <Maximize2 size={24} className="text-white" />
              </button>
              <div className="flex gap-2">
                  <button
@@ -91,12 +89,6 @@ const CameraCard: React.FC<CameraCardProps> = ({ camera, onMaximize }) => {
                  >
                     {analyzing ? <Activity className="animate-spin" size={14}/> : <Eye size={14}/>}
                     {analyzing ? 'Analyzing...' : 'Smart Analysis'}
-                 </button>
-                 <button
-                    onClick={(e) => { e.stopPropagation(); onMaximize(camera); }}
-                    className="px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white text-xs font-medium flex items-center gap-2"
-                 >
-                    <Maximize2 size={14}/> Fullscreen
                  </button>
              </div>
           </div>

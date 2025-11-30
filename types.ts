@@ -1,23 +1,26 @@
 
 export type ViewState = 'dashboard' | 'review' | 'face-id' | 'analytics' | 'banned' | 'theft' | 'settings' | 'training';
 
+export type CameraType = 'rtsp' | 'onvif' | 'file' | 'simulated-office' | 'simulated-outdoor' | 'simulated-warehouse';
+
 export interface Camera {
   id: string;
   name: string;
   location: string;
   status: 'online' | 'offline' | 'maintenance';
-  thumbnail: string; // Acts as the current frame for simulation
-  rtspUrl?: string; // The backend connection string
+  type: CameraType;
+  rtspUrl: string; 
   fps: number;
   resolution: string;
   isRecording: boolean;
+  thumbnail: string;
 }
 
 export interface SecurityEvent {
   id: string;
   type: 'motion' | 'person' | 'vehicle' | 'face' | 'theft';
   severity: 'low' | 'medium' | 'high' | 'critical';
-  timestamp: string; // ISO string for storage
+  timestamp: string;
   cameraName: string;
   description: string;
   thumbnail: string;
@@ -38,7 +41,7 @@ export interface TrainingModel {
   label: string;
   category: 'person' | 'object' | 'vehicle';
   dataType: 'image' | 'video';
-  dataUrl: string; // Base64 string of reference image or video thumbnail
+  dataUrl: string;
   description: string;
   dateAdded: string;
 }

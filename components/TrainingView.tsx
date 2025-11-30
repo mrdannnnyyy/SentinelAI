@@ -25,13 +25,11 @@ const TrainingView: React.FC<TrainingViewProps> = ({ initialData, onClearInitial
 
   useEffect(() => {
     refreshModels();
-    
-    // Check if we have incoming data from "Record to Train"
     if (initialData) {
         setIsModalOpen(true);
         if (initialData.image) setUploadedData(initialData.image);
         if (initialData.description) setDescription(initialData.description);
-        setDataType('image'); // Default to image for snapshots
+        setDataType('image');
     }
   }, [initialData]);
 
@@ -59,10 +57,9 @@ const TrainingView: React.FC<TrainingViewProps> = ({ initialData, onClearInitial
       category,
       dataType,
       description,
-      dataUrl: uploadedData // In real app, upload to S3/Cloud Storage and get URL
+      dataUrl: uploadedData
     });
 
-    // Reset
     setLabel('');
     setDescription('');
     setUploadedData(null);
@@ -109,13 +106,12 @@ const TrainingView: React.FC<TrainingViewProps> = ({ initialData, onClearInitial
               {model.dataType === 'video' ? (
                   <>
                     <Video className="text-slate-600 absolute z-0" size={48} />
-                    {/* In a real app, this would be a thumbnail of the video */}
                     <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center">
                         <Video className="text-white/80" size={32} />
                     </div>
                   </>
               ) : (
-                <img src={model.dataUrl} alt={model.label} className="w-full h-full object-cover" />
+                <img src={model.dataUrl || ''} alt={model.label} className="w-full h-full object-cover" />
               )}
               
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4 z-20">
@@ -124,7 +120,6 @@ const TrainingView: React.FC<TrainingViewProps> = ({ initialData, onClearInitial
                         <span className="text-xs font-bold uppercase tracking-wider text-purple-400 mb-1 block">{model.category}</span>
                         <h3 className="text-white font-bold text-lg leading-tight">{model.label}</h3>
                     </div>
-                    {model.dataType === 'video' && <Video size={16} className="text-slate-400 mb-1" />}
                  </div>
               </div>
               <button 
@@ -143,106 +138,48 @@ const TrainingView: React.FC<TrainingViewProps> = ({ initialData, onClearInitial
             </div>
           </div>
         ))}
-
         {models.length === 0 && (
           <div className="col-span-full py-12 flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-800 rounded-xl">
              <BrainCircuit size={48} className="mb-4 opacity-50" />
              <p>No custom models trained yet.</p>
-             <button onClick={() => setIsModalOpen(true)} className="mt-2 text-purple-400 hover:text-purple-300">Create your first model</button>
           </div>
         )}
       </div>
 
-      {/* Add Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-slate-900 rounded-xl border border-slate-700 w-full max-w-lg shadow-2xl">
             <div className="p-6 border-b border-slate-800">
                <h2 className="text-xl font-bold text-white">Train New Model</h2>
             </div>
-            
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
                <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Label Name</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={label}
-                    onChange={e => setLabel(e.target.value)}
-                    placeholder="e.g., Red Backpack, Staff Uniform, CEO"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:border-purple-500 outline-none"
-                  />
+                  <input type="text" required value={label} onChange={e => setLabel(e.target.value)} placeholder="e.g., Red Backpack" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white outline-none" />
                </div>
-
                <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Category</label>
-                  <select 
-                    value={category}
-                    onChange={(e: any) => setCategory(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:border-purple-500 outline-none"
-                  >
+                  <select value={category} onChange={(e: any) => setCategory(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white outline-none">
                     <option value="object">Object</option>
                     <option value="person">Person</option>
                     <option value="vehicle">Vehicle</option>
                   </select>
                </div>
-
                <div>
                    <label className="block text-sm font-medium text-slate-400 mb-2">Data Type</label>
                    <div className="flex gap-4 mb-4">
-                       <button
-                         type="button"
-                         onClick={() => { setDataType('image'); setUploadedData(null); }}
-                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border ${dataType === 'image' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'border-slate-700 text-slate-400'}`}
-                       >
-                           <ImageIcon size={16} /> Image
-                       </button>
-                       <button
-                         type="button"
-                         onClick={() => { setDataType('video'); setUploadedData(null); }}
-                         className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border ${dataType === 'video' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'border-slate-700 text-slate-400'}`}
-                       >
-                           <Video size={16} /> Video
-                       </button>
+                       <button type="button" onClick={() => { setDataType('image'); setUploadedData(null); }} className={`flex-1 py-2 rounded-lg border ${dataType === 'image' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'border-slate-700 text-slate-400'}`}>Image</button>
+                       <button type="button" onClick={() => { setDataType('video'); setUploadedData(null); }} className={`flex-1 py-2 rounded-lg border ${dataType === 'video' ? 'bg-purple-600/20 border-purple-500 text-purple-400' : 'border-slate-700 text-slate-400'}`}>Video</button>
                    </div>
-
-                  <div className="border-2 border-dashed border-slate-800 rounded-lg p-6 flex flex-col items-center justify-center text-center hover:border-slate-600 transition-colors cursor-pointer relative overflow-hidden">
-                     <input 
-                        type="file" 
-                        accept={dataType === 'image' ? "image/*" : "video/*"} 
-                        onChange={handleFileUpload} 
-                        className="absolute inset-0 opacity-0 cursor-pointer" 
-                     />
-                     {uploadedData ? (
-                        dataType === 'image' ? (
-                            <img src={uploadedData} alt="Preview" className="h-32 object-contain rounded" />
-                        ) : (
-                            <div className="flex flex-col items-center text-green-400">
-                                <Video size={32} className="mb-2" />
-                                <span className="text-sm">Video Selected</span>
-                            </div>
-                        )
-                     ) : (
-                        <>
-                          <Upload className="text-slate-500 mb-2" />
-                          <span className="text-sm text-slate-400">
-                              Click to upload {dataType === 'image' ? 'Reference Image' : 'Training Video'}
-                          </span>
-                        </>
-                     )}
+                  <div className="border-2 border-dashed border-slate-800 rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden">
+                     <input type="file" accept={dataType === 'image' ? "image/*" : "video/*"} onChange={handleFileUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                     {uploadedData ? ( dataType === 'image' ? <img src={uploadedData} alt="Preview" className="h-32 object-contain" /> : <span className="text-green-400">Video Selected</span> ) : <span className="text-sm text-slate-400">Click to upload</span>}
                   </div>
                </div>
-
                <div>
-                  <label className="block text-sm font-medium text-slate-400 mb-1">Description (Context for AI)</label>
-                  <textarea 
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    placeholder="Describe distinguishing features, behavior to look for..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white focus:border-purple-500 outline-none h-24 resize-none"
-                  />
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Description</label>
+                  <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Description..." className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white outline-none h-24 resize-none" />
                </div>
-
                <div className="flex gap-3 pt-4">
                   <button type="button" onClick={handleCloseModal} className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-lg">Cancel</button>
                   <button type="submit" className="flex-1 bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-lg font-bold">Train Model</button>
